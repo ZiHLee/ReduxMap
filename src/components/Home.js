@@ -1,12 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, StyleSheet} from 'react-native';
 import {SearchBar} from '@ant-design/react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {addMap, getMap} from '../actions/mapActions';
 
 const Home = () => {
-  const map = useSelector(state => state.map.map);
-  const hist = useSelector(state => state.map.history);
   const [value, setValue] = useState('');
   const [removeV, setRemoveV] = useState(false);
   const onSearch = searchText => {
@@ -14,13 +12,27 @@ const Home = () => {
   };
   const onCancel = () => {
     setValue('');
+    setRemoveV(false);
   };
   const onChange = data => {
     setValue(data);
-    setRemoveV(true);
+    setRemoveV(false);
+    if (data.trim().length !== 0) {
+      setRemoveV(true);
+    }
   };
 
+  const map = useSelector(state => state.map.map);
+  const mapFilter = map.filter(
+    map => map.city == value || map.city.toUpperCase().startsWith(value),
+  );
+  const hist = useSelector(state => state.map.history);
   const dispatch = useDispatch();
+  const checkDuplicate = data => {
+    if (!hist.includes(data)) {
+      dispatch(addMap(data));
+    }
+  };
   useEffect(() => {
     dispatch(getMap());
   }, [dispatch]);
@@ -39,24 +51,26 @@ const Home = () => {
         <View>
           {/* style={{position: 'absolute', marginTop: 50, width: '100%', height: 100, backgroundColor: 'white'}} */}
           {map &&
-            map.map((map, index) => (
+            mapFilter.map((map, index) => (
               <Text
-                style={{marginTop: 5, padding: 20, backgroundColor: 'white'}}
+                style={styles.searchOptions}
                 key={index}
                 onPress={() => {
                   //console.log(index);
                   setValue(map.city);
                   setRemoveV(false);
-                  dispatch(addMap(map.city))
+                  checkDuplicate(
+                    map.city + ' : ' + map.latitude + ' , ' + map.longitude,
+                  );
                 }}>
-                {map.city.includes(value)}
+                {map.city}
               </Text>
             ))}
         </View>
       )}
-      <Text style={{marginTop: 20, backgroundColor: 'grey', height: 500}}>
-        {hist && hist.map((hist, index) => (
-          <Text key={index}>{hist+"\n"}</Text>
+      <Text style={styles.searchResult}>
+        {hist.map((hist, index) => (
+          <Text key={index}>{hist + '\n'}</Text>
         ))}
       </Text>
     </View>
@@ -64,3 +78,18 @@ const Home = () => {
 };
 
 export default Home;
+
+const styles = StyleSheet.create({
+  searchOptions: {
+    marginTop: 5,
+    padding: 20,
+    backgroundColor: 'white',
+  },
+  searchResult: {
+    marginTop: 20,
+    backgroundColor: 'grey',
+    height: 500,
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+});

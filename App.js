@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import Navigator from './routes/homeStack';
+import Navigator from './src/routes/homeStack';
 import {Provider} from 'react-redux';
-import store from './reducer/mapReducer';
+import store from './src/reducer/mapReducer';
 
 const App = () => {
   return (
