@@ -24,7 +24,12 @@ const Home = () => {
 
   const map = useSelector(state => state.map.map);
   const mapFilter = map.filter(
-    map => map.city == value || map.city.toUpperCase().startsWith(value),
+    map =>
+      map.city == value ||
+      map.city.toUpperCase().startsWith(value) ||
+      (
+        map.city.charAt(0).toUpperCase() + map.city.slice(1).toLowerCase()
+      ).includes(value),
   );
   const hist = useSelector(state => state.map.history);
   const dispatch = useDispatch();
